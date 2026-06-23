@@ -31,6 +31,10 @@ Raw video remains in the browser temporary upload area. The application does not
 
 Use `powershell -ExecutionPolicy Bypass -File scripts/verify.ps1` to run the formula tests and syntax check.
 
+## Streamlit Community Cloud
+
+This project requires Python 3.12 because the pinned MediaPipe wheel does not support newer Python runtimes. The repository includes `runtime.txt` for Streamlit Community Cloud. Select `app/streamlit_app.py` as the main file, then redeploy after pushing this file.
+
 ## Recording protocol for the demo
 
 - Seat the participant facing the camera, with shoulders, torso, and both hands visible.
