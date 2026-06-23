@@ -1,6 +1,6 @@
-# ElderMove AI
+# Virtual Rehab Vibe Coach
 
-Local-first video movement screening prototype for the E-Health Hackathon 2026.
+Local-first AI vision and agentic coaching prototype for the E-Health Hackathon 2026.
 
 It estimates upper-limb movement markers from a seated-video recording: hand-use balance, range of motion, speed, smoothness, trunk compensation, and a transparent screening flag. It is a demo and decision-support tool, **not a diagnosis or a substitute for a clinician**.
 

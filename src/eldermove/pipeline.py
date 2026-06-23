@@ -10,6 +10,7 @@ import cv2
 
 from src.eldermove.analysis.metrics import calculate_metrics
 from src.eldermove.analysis.scoring import screen
+from src.eldermove.agent import VirtualRehabCoach
 from src.eldermove.config import AppConfig
 from src.eldermove.domain.models import AnalysisContext, LandmarkObservation
 from src.eldermove.vision.mediapipe_detector import MediaPipeHolisticDetector
@@ -76,6 +77,7 @@ class VideoAnalyzer:
         if metrics["left_accuracy_score"] is None and metrics["right_accuracy_score"] is None:
             warnings.append("Red target marker was not detected; endpoint accuracy is unavailable.")
         screening = screen(metrics, coverage, context)
+        coach = VirtualRehabCoach().run({"metrics": metrics})
         timeseries = metrics.pop("timeseries")
         return {
             "report_version": "0.1.0",
@@ -94,6 +96,7 @@ class VideoAnalyzer:
             },
             "metrics": metrics,
             "screening": screening,
+            "coach": coach,
             "timeseries": timeseries,
         }
 

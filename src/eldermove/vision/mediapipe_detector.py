@@ -53,4 +53,6 @@ class MediaPipeHolisticDetector:
             left_hip=self._point(pose, landmark.LEFT_HIP),
             right_hip=self._point(pose, landmark.RIGHT_HIP),
             pose_confidence=confidence if pose else 0.0,
+            left_elbow=self._point(pose, landmark.LEFT_ELBOW),
+            right_elbow=self._point(pose, landmark.RIGHT_ELBOW),
         )

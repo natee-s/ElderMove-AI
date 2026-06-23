@@ -48,6 +48,8 @@ class LandmarkObservation:
     left_hip: Point | None
     right_hip: Point | None
     pose_confidence: float
+    left_elbow: Point | None = None
+    right_elbow: Point | None = None
     target_marker: Point | None = None
 
 

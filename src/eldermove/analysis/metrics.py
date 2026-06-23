@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from math import hypot
+from math import acos, degrees, hypot
 
 import numpy as np
 
@@ -51,6 +51,45 @@ def _smoothness_score(speeds: list[float]) -> float:
         return 0.0
     jerk_proxy = float(np.mean(np.abs(np.diff(speeds))))
     return float(np.clip(100 * (1 - jerk_proxy / 2.0), 0, 100))
+
+
+def _path_efficiency(observations: list[LandmarkObservation], hand: str) -> float:
+    points = [getattr(item, f"{hand}_wrist") for item in observations]
+    points = [point for point in points if point]
+    if len(points) < 3:
+        return 0.0
+    path = sum(distance(first, second) for first, second in zip(points, points[1:]))
+    return float(np.clip(distance(points[0], points[-1]) / max(path, 0.001) * 100, 0, 100))
+
+
+def _trajectory_control(speeds: list[float]) -> float:
+    if len(speeds) < 3 or np.mean(speeds) <= 0:
+        return 0.0
+    variation = float(np.std(speeds) / max(np.mean(speeds), 0.001))
+    return float(np.clip(100 * (1 - variation / 2.5), 0, 100))
+
+
+def _hesitation_count(speeds: list[float]) -> int:
+    if len(speeds) < 4 or max(speeds) <= 0:
+        return 0
+    threshold = max(speeds) * 0.18
+    low = [speed < threshold for speed in speeds]
+    return sum(1 for was_low, is_low in zip(low, low[1:]) if not was_low and is_low)
+
+
+def _elbow_range(observations: list[LandmarkObservation], hand: str) -> float:
+    angles: list[float] = []
+    for item in observations:
+        shoulder, elbow, wrist = getattr(item, f"{hand}_shoulder"), getattr(item, f"{hand}_elbow"), getattr(item, f"{hand}_wrist")
+        if not (shoulder and elbow and wrist):
+            continue
+        first = (shoulder.x - elbow.x, shoulder.y - elbow.y)
+        second = (wrist.x - elbow.x, wrist.y - elbow.y)
+        denominator = hypot(*first) * hypot(*second)
+        if denominator:
+            cosine = np.clip((first[0] * second[0] + first[1] * second[1]) / denominator, -1, 1)
+            angles.append(degrees(acos(cosine)))
+    return max(angles, default=0.0) - min(angles, default=0.0)
 
 
 def _trunk_compensation(observations: list[LandmarkObservation]) -> float:
@@ -118,6 +157,14 @@ def calculate_metrics(observations: list[LandmarkObservation]) -> dict[str, floa
         "right_endpoint_error": right_error,
         "left_accuracy_score": left_accuracy,
         "right_accuracy_score": right_accuracy,
+        "left_path_efficiency": _path_efficiency(observations, "left"),
+        "right_path_efficiency": _path_efficiency(observations, "right"),
+        "left_trajectory_control": _trajectory_control(left_speeds),
+        "right_trajectory_control": _trajectory_control(right_speeds),
+        "left_hesitation_count": _hesitation_count(left_speeds),
+        "right_hesitation_count": _hesitation_count(right_speeds),
+        "left_elbow_range": _elbow_range(observations, "left"),
+        "right_elbow_range": _elbow_range(observations, "right"),
         "trunk_compensation_score": _trunk_compensation(observations),
         "timeseries": timeseries,
     }
