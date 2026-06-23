@@ -24,13 +24,13 @@ def analyze(uploaded):
     except Exception as e: st.error(f"วิเคราะห์ไม่สำเร็จ: {e}"); return None
     finally: path.unlink(missing_ok=True)
 def results(report):
-    coach=report["coach"]; inf=coach["inference"]; m=report["metrics"]; q=report["quality"]
+    coach=report["coach"]; inf=coach["inference"]; view=coach["presentation"]; m=report["metrics"]; q=report["quality"]
     st.divider(); st.header("ผลประเมินจาก Virtual Rehab Vibe Coach")
-    a,b,c=st.columns(3); a.metric("แขนที่คาดว่าถนัดโดยธรรมชาติ",label(inf["predicted_natural_dominance"])); b.metric("แขนที่เลือกใช้ในคลิป",label(inf["observed_hand_choice"])); c.metric("ความมั่นใจ",inf["dominance_confidence"].upper())
+    a,b,c=st.columns(3); a.metric("แขนที่คาดว่าถนัดโดยธรรมชาติ",label(view["predicted_natural_dominance"])); b.metric("แขนที่เลือกใช้ในคลิป",label(view["observed_hand_choice"])); c.metric("ความมั่นใจ",inf["dominance_confidence"].upper())
     st.info(coach["coach_message"])
-    hypothesis=inf["learned_non_use_hypothesis"].replace('_',' ')
+    hypothesis=view["learned_non_use_hypothesis"].replace('_',' ')
     st.subheader("Learned Non-use Hypothesis"); st.write(hypothesis)
-    st.caption("เป็น AI-assisted functional inference จากคลิป ไม่ใช่การวินิจฉัยทางการแพทย์")
+    st.caption("ผลซ้าย/ขวาใช้ทิศตาม label ที่ปรากฏบนวิดีโอ ไม่ใช่ anatomical side ของ MediaPipe")
     st.subheader("Digital biomarkers")
     rows=[]
     for side in ("left","right"):

@@ -1,4 +1,5 @@
 from src.eldermove.analysis.reasoning import infer_hand_use
+from src.eldermove.agent import _camera_label
 
 
 def test_reasoning_flags_mismatch_between_prediction_and_observed_choice() -> None:
@@ -13,3 +14,8 @@ def test_reasoning_flags_mismatch_between_prediction_and_observed_choice() -> No
     assert result["predicted_natural_dominance"] == "left"
     assert result["observed_hand_choice"] == "right"
     assert result["learned_non_use_hypothesis"] == "possible_left_learned_non_use"
+
+
+def test_camera_label_mapping_matches_supplied_video_convention() -> None:
+    assert _camera_label("right") == "left"
+    assert _camera_label("left") == "right"
