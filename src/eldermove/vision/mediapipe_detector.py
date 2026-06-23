@@ -14,7 +14,9 @@ class MediaPipeHolisticDetector:
         self._mp = mp
         self._engine = mp.solutions.holistic.Holistic(
             static_image_mode=False,
-            model_complexity=0,
+            # Complexity 1 ships inside the MediaPipe wheel. Complexity 0 lazily
+            # downloads a model into site-packages, which is read-only on Streamlit Cloud.
+            model_complexity=1,
             smooth_landmarks=True,
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_detection_confidence,
