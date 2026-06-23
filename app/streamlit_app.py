@@ -26,8 +26,13 @@ def analyze(uploaded):
     with tempfile.NamedTemporaryFile(suffix=Path(uploaded.name).suffix or '.mp4',delete=False) as f: f.write(uploaded.getbuffer()); path=Path(f.name)
     try:
         p=st.progress(0,text="AI Vision กำลังสกัดข้อมูลการเคลื่อนไหว")
-        return VideoAnalyzer(AppConfig.from_environment()).analyze(path,AnalysisContext("Free-choice activity",TaskMode.FREE_CHOICE,HandSide.UNKNOWN,HandSide.UNKNOWN),lambda c,t:p.progress(int(c/max(t,1)*100),text=f"กำลังวิเคราะห์ frame {c}/{t}"))
-    except Exception as e: st.error(f"วิเคราะห์ไม่สำเร็จ: {e}"); return None
+        report = VideoAnalyzer(AppConfig.from_environment()).analyze(path,AnalysisContext("Free-choice activity",TaskMode.FREE_CHOICE,HandSide.UNKNOWN,HandSide.UNKNOWN),lambda c,t:p.progress(int(c/max(t,1)*100),text=f"กำลังวิเคราะห์ frame {c}/{t}"))
+        p.empty()
+        return report
+    except Exception as e:
+        p.empty()
+        st.error(f"วิเคราะห์ไม่สำเร็จ: {e}")
+        return None
     finally: path.unlink(missing_ok=True)
 def results(report):
     coach=report["coach"]; inf=coach["inference"]; view=coach["presentation"]; m=report["metrics"]; q=report["quality"]
@@ -69,6 +74,12 @@ def main():
         st.video(uploaded)
     if st.button("เริ่มวิเคราะห์ด้วย AI Coach",type="primary",use_container_width=True,disabled=not(uploaded and consent)):
         report=analyze(uploaded)
-        if report: st.session_state['rehab_report']=report
-    if report:=st.session_state.get('rehab_report'): results(report)
+        if report:
+            st.session_state['rehab_report']=report
+            st.session_state['analysis_completed']=True
+    if report:=st.session_state.get('rehab_report'):
+        if st.session_state.pop('analysis_completed', False):
+            st.toast("วิเคราะห์วิดีโอเสร็จแล้ว")
+            st.success("วิเคราะห์เสร็จแล้ว เลื่อนลงเพื่อดูผลสรุปจาก Virtual Rehab Vibe Coach")
+        results(report)
 if __name__=='__main__': main()
