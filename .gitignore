@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.streamlit/
+*.py[cod]
+outputs/
+data/raw/
+!data/raw/.gitkeep
+
+tmp/
+test_clip/
+*.mp4
+*.mov
+*.avi
+.env
